@@ -14,13 +14,11 @@ class Student(Base):
     id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     name = Column(Text, nullable=False)
     class_name = Column(Text, nullable=False)
-    section = Column(Text, nullable=False)
-    roll_no = Column(Integer, nullable=True)
     created_at = Column(Date, server_default=func.now())
 
     # Relationships
     diary_entries = relationship("DiaryEntry", back_populates="student", cascade="all, delete-orphan")
-    marks = relationship("Mark", back_populates="student", cascade="all, delete-orphan")
+
 
 
 class DiaryEntry(Base):
@@ -46,18 +44,4 @@ class DiaryEntry(Base):
     student = relationship("Student", back_populates="diary_entries")
 
 
-class Mark(Base):
-    __tablename__ = "marks"
 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    student_id = Column(UUID(as_uuid=True), ForeignKey("students.id", ondelete="CASCADE"), nullable=False)
-    test_date = Column(Date, nullable=False)
-    subject = Column(Text, nullable=False)
-    mark = Column(Integer, nullable=False)
-    max_mark = Column(Integer, nullable=False)
-    remarks = Column(Text, nullable=True)
-    share_key = Column(Text, unique=True, nullable=False)
-    created_at = Column(Date, server_default=func.now())
-
-    # Relationships
-    student = relationship("Student", back_populates="marks")

@@ -8,8 +8,6 @@ from typing import Optional
 class StudentBase(BaseModel):
     name: str
     class_name: str
-    section: str
-    roll_no: Optional[int] = None
 
 
 class StudentCreate(StudentBase):
@@ -51,40 +49,9 @@ class DiaryEntryPublic(DiaryEntryBase):
     """Public view for parents - no student_id exposed"""
     student_name: str
     class_name: str
-    section: str
 
     class Config:
         from_attributes = True
 
 
-# Mark Schemas
-class MarkBase(BaseModel):
-    test_date: date
-    subject: str
-    mark: int
-    max_mark: int
-    remarks: Optional[str] = None
 
-
-class MarkCreate(MarkBase):
-    student_id: UUID
-
-
-class MarkResponse(MarkBase):
-    id: UUID
-    student_id: UUID
-    share_key: str
-    created_at: date
-
-    class Config:
-        from_attributes = True
-
-
-class MarkPublic(MarkBase):
-    """Public view for parents - no student_id exposed"""
-    student_name: str
-    class_name: str
-    section: str
-
-    class Config:
-        from_attributes = True

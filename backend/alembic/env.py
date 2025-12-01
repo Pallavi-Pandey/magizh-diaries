@@ -7,7 +7,7 @@ from alembic import context
 
 # Import your models and database configuration
 from app.database import Base
-from app.models import Student, DiaryEntry, Mark
+from app.models import Student, DiaryEntry
 from app.config import get_settings
 
 # this is the Alembic Config object, which provides
