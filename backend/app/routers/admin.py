@@ -4,11 +4,10 @@ from typing import List
 from uuid import UUID
 
 from app.database import get_db
-from app.models import Student, DiaryEntry, Mark
+from app.models import Student, DiaryEntry
 from app.schemas import (
     StudentCreate, StudentResponse,
-    DiaryEntryCreate, DiaryEntryResponse,
-    MarkCreate, MarkResponse
+    DiaryEntryCreate, DiaryEntryResponse
 )
 from app.utils import generate_share_key
 
@@ -139,71 +138,4 @@ def delete_diary_entry(entry_id: UUID, db: Session = Depends(get_db)):
     return None
 
 
-# ==================== MARKS ROUTES ====================
-@router.post("/marks", response_model=MarkResponse, status_code=status.HTTP_201_CREATED)
-def create_mark(mark: MarkCreate, db: Session = Depends(get_db)):
-    """Create a new mark entry"""
-    # Check if student exists
-    student = db.query(Student).filter(Student.id == mark.student_id).first()
-    if not student:
-        raise HTTPException(status_code=404, detail="Student not found")
-    
-    # Generate unique share key
-    share_key = generate_share_key()
-    
-    db_mark = Mark(**mark.model_dump(), share_key=share_key)
-    db.add(db_mark)
-    db.commit()
-    db.refresh(db_mark)
-    return db_mark
 
-
-@router.get("/marks", response_model=List[MarkResponse])
-def list_marks(
-    student_id: UUID = None,
-    skip: int = 0,
-    limit: int = 100,
-    db: Session = Depends(get_db)
-):
-    """List marks, optionally filtered by student"""
-    query = db.query(Mark)
-    if student_id:
-        query = query.filter(Mark.student_id == student_id)
-    marks = query.offset(skip).limit(limit).all()
-    return marks
-
-
-@router.get("/marks/{mark_id}", response_model=MarkResponse)
-def get_mark(mark_id: UUID, db: Session = Depends(get_db)):
-    """Get a specific mark entry"""
-    mark = db.query(Mark).filter(Mark.id == mark_id).first()
-    if not mark:
-        raise HTTPException(status_code=404, detail="Mark not found")
-    return mark
-
-
-@router.put("/marks/{mark_id}", response_model=MarkResponse)
-def update_mark(mark_id: UUID, mark_update: MarkCreate, db: Session = Depends(get_db)):
-    """Update a mark entry"""
-    mark = db.query(Mark).filter(Mark.id == mark_id).first()
-    if not mark:
-        raise HTTPException(status_code=404, detail="Mark not found")
-    
-    for key, value in mark_update.model_dump(exclude={'student_id'}).items():
-        setattr(mark, key, value)
-    
-    db.commit()
-    db.refresh(mark)
-    return mark
-
-
-@router.delete("/marks/{mark_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_mark(mark_id: UUID, db: Session = Depends(get_db)):
-    """Delete a mark entry"""
-    mark = db.query(Mark).filter(Mark.id == mark_id).first()
-    if not mark:
-        raise HTTPException(status_code=404, detail="Mark not found")
-    
-    db.delete(mark)
-    db.commit()
-    return None
